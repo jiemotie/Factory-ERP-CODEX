@@ -74,6 +74,16 @@ describe('Factory ERP backend API', () => {
     const transactions = await request('/api/v1/inventory-transactions');
     assert.equal(transactions.response.status, 200);
     assert.equal(transactions.payload.data.length, 1);
+
+    const balances = await request('/api/v1/inventory-balances');
+    assert.equal(balances.response.status, 200);
+    assert.equal(balances.payload.data[0].materialCode, 'STEEL-001');
+    assert.equal(balances.payload.data[0].quantity, 120);
+
+    const inventoryReport = await request('/api/v1/reports/inventory-balance');
+    assert.equal(inventoryReport.response.status, 200);
+    assert.equal(inventoryReport.payload.data.totalMaterials, 1);
+    assert.equal(inventoryReport.payload.data.totalQuantity, 120);
   });
 
   it('rejects invalid material inbound state transitions', async () => {

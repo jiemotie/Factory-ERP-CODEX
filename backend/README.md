@@ -31,10 +31,10 @@ ERP_DATA_FILE=./data/factory-erp.json npm start
 ## 已实现模块
 
 1. `identity`：登录、退出、用户列表/创建、角色列表/创建、权限列表
-2. `material-inbound`：材料入库单创建、查询、审核、确认入库、状态校验与库存流水查询
+2. `material-inbound`：材料入库单创建、查询、审核、确认入库、状态校验、库存流水查询与库存余额汇总
 3. `order-entry`：订单创建、查询、更新、审核、取消
 4. `process-flow`：工艺路线创建/查询、工序任务创建、开工、完工、返工
-5. `reports`：入库统计、订单进度、工序产能、良率分析
+5. `reports`：入库统计、订单进度、工序产能、良率分析、库存余额报表
 
 ## API 约定
 

@@ -86,3 +86,34 @@ export function listInventoryTransactions({ headers, store }) {
   authorize(headers, store, 'material:write');
   return ok(store.inventoryTransactions);
 }
+
+export function buildInventoryBalances(transactions) {
+  const balances = new Map();
+  for (const transaction of transactions) {
+    const key = [transaction.materialCode, transaction.batchNo ?? '', transaction.unit ?? ''].join('|');
+    const current = balances.get(key) ?? {
+      materialCode: transaction.materialCode,
+      materialName: transaction.materialName,
+      batchNo: transaction.batchNo,
+      unit: transaction.unit,
+      quantity: 0,
+      lastTransactionAt: transaction.createdAt
+    };
+    const signedQuantity = transaction.direction === 'out' ? -Number(transaction.quantity ?? 0) : Number(transaction.quantity ?? 0);
+    current.quantity += signedQuantity;
+    current.lastTransactionAt = transaction.createdAt;
+    balances.set(key, current);
+  }
+  return Array.from(balances.values()).sort((left, right) => {
+    const materialCompare = String(left.materialCode).localeCompare(String(right.materialCode));
+    if (materialCompare !== 0) {
+      return materialCompare;
+    }
+    return String(left.batchNo ?? '').localeCompare(String(right.batchNo ?? ''));
+  });
+}
+
+export function listInventoryBalances({ headers, store }) {
+  authorize(headers, store, 'material:write');
+  return ok(buildInventoryBalances(store.inventoryTransactions));
+}

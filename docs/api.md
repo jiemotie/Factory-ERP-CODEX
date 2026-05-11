@@ -34,6 +34,7 @@ Authorization: Bearer <token>
 | POST | `/api/v1/material-inbounds/{id}/approve` | 审核入库单 | Implemented |
 | POST | `/api/v1/material-inbounds/{id}/confirm` | 确认入库并生成库存流水 | Implemented |
 | GET | `/api/v1/inventory-transactions` | 查询库存流水 | Implemented |
+| GET | `/api/v1/inventory-balances` | 查询库存余额 | Implemented |
 
 ## Order Entry
 
@@ -66,3 +67,4 @@ Authorization: Bearer <token>
 | GET | `/api/v1/reports/order-progress` | 订单进度报表 | Implemented |
 | GET | `/api/v1/reports/process-capacity` | 工序产能报表 | Implemented |
 | GET | `/api/v1/reports/quality-rate` | 良率分析报表 | Implemented |
+| GET | `/api/v1/reports/inventory-balance` | 库存余额报表 | Implemented |

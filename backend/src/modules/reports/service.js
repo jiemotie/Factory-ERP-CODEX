@@ -1,5 +1,6 @@
 import { ok } from '../../http.js';
 import { authorize } from '../identity/service.js';
+import { buildInventoryBalances } from '../material-inbound/service.js';
 
 function sum(items, selector) {
   return items.reduce((total, item) => total + Number(selector(item) ?? 0), 0);
@@ -43,5 +44,15 @@ export function qualityRate({ headers, store }) {
     defectQuantity,
     goodQuantity,
     qualityRate: outputQuantity === 0 ? 0 : Number((goodQuantity / outputQuantity).toFixed(4))
+  });
+}
+
+export function inventoryBalance({ headers, store }) {
+  authorize(headers, store, 'report:read');
+  const balances = buildInventoryBalances(store.inventoryTransactions);
+  return ok({
+    totalMaterials: balances.length,
+    totalQuantity: sum(balances, (balance) => balance.quantity),
+    balances
   });
 }

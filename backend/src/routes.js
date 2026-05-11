@@ -12,6 +12,7 @@ import {
   confirmMaterialInbound,
   createMaterialInbound,
   getMaterialInbound,
+  listInventoryBalances,
   listInventoryTransactions,
   listMaterialInbounds
 } from './modules/material-inbound/service.js';
@@ -25,7 +26,7 @@ import {
   reworkProcessTask,
   startProcessTask
 } from './modules/process-flow/service.js';
-import { materialInboundSummary, orderProgress, processCapacity, qualityRate } from './modules/reports/service.js';
+import { inventoryBalance, materialInboundSummary, orderProgress, processCapacity, qualityRate } from './modules/reports/service.js';
 
 export const routes = [
   { method: 'POST', path: '/api/v1/auth/login', handler: login },
@@ -42,6 +43,7 @@ export const routes = [
   { method: 'POST', path: '/api/v1/material-inbounds/:id/approve', handler: approveMaterialInbound },
   { method: 'POST', path: '/api/v1/material-inbounds/:id/confirm', handler: confirmMaterialInbound },
   { method: 'GET', path: '/api/v1/inventory-transactions', handler: listInventoryTransactions },
+  { method: 'GET', path: '/api/v1/inventory-balances', handler: listInventoryBalances },
 
   { method: 'GET', path: '/api/v1/orders', handler: listOrders },
   { method: 'POST', path: '/api/v1/orders', handler: createOrder },
@@ -61,5 +63,6 @@ export const routes = [
   { method: 'GET', path: '/api/v1/reports/material-inbound-summary', handler: materialInboundSummary },
   { method: 'GET', path: '/api/v1/reports/order-progress', handler: orderProgress },
   { method: 'GET', path: '/api/v1/reports/process-capacity', handler: processCapacity },
-  { method: 'GET', path: '/api/v1/reports/quality-rate', handler: qualityRate }
+  { method: 'GET', path: '/api/v1/reports/quality-rate', handler: qualityRate },
+  { method: 'GET', path: '/api/v1/reports/inventory-balance', handler: inventoryBalance }
 ];
