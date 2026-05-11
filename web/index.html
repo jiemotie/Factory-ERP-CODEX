@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Factory ERP Web 管理端</title>
+    <link rel="stylesheet" href="/web/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">统一 API · 表格化原型</p>
+        <h1>Factory ERP Web 管理端</h1>
+        <p class="subtitle">当前阶段不接入真实数据库，所有数据通过后端 API 以表格形式展示、录入和流转。</p>
+      </div>
+      <div class="session-card">
+        <span id="session-status">未登录</span>
+        <button id="logout-button" class="ghost" type="button" hidden>退出</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="login-panel" class="panel login-panel">
+        <div>
+          <p class="eyebrow">开发账号</p>
+          <h2>登录统一后端</h2>
+          <p>默认账号为 <strong>admin</strong> / <strong>admin123</strong>。登录后 Web 管理端只通过同源 `/api/v1` 接口读写数据。</p>
+        </div>
+        <form id="login-form" class="form-grid compact">
+          <label>
+            用户名
+            <input name="username" value="admin" autocomplete="username" required />
+          </label>
+          <label>
+            密码
+            <input name="password" value="admin123" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit">登录</button>
+        </form>
+      </section>
+
+      <section id="workspace" class="workspace" hidden>
+        <nav class="tabs" aria-label="业务模块">
+          <button class="active" data-tab="identity" type="button">用户权限</button>
+          <button data-tab="material" type="button">材料入库</button>
+          <button data-tab="inventory" type="button">库存表格</button>
+          <button data-tab="orders" type="button">订单录入</button>
+          <button data-tab="process" type="button">工序流转</button>
+          <button data-tab="reports" type="button">报表分析</button>
+          <button data-tab="audit" type="button">审计日志</button>
+        </nav>
+
+        <section class="panel tab-panel active" id="tab-identity">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Identity</p>
+              <h2>用户、角色、权限</h2>
+            </div>
+            <button data-refresh="identity" type="button">刷新表格</button>
+          </div>
+          <form id="user-form" class="form-grid">
+            <label>用户名<input name="username" placeholder="zhangsan" required /></label>
+            <label>显示名<input name="displayName" placeholder="张三" required /></label>
+            <label>初始密码<input name="password" type="password" placeholder="至少开发环境可用" required /></label>
+            <label>角色 ID<input name="roleIds" placeholder="role-warehouse,role-production" /></label>
+            <button type="submit">新增用户</button>
+          </form>
+          <div class="table-grid two">
+            <article><h3>用户表</h3><div id="users-table"></div></article>
+            <article><h3>角色表</h3><div id="roles-table"></div></article>
+          </div>
+          <article><h3>权限表</h3><div id="permissions-table"></div></article>
+        </section>
+
+        <section class="panel tab-panel" id="tab-material">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Material Inbound</p>
+              <h2>材料入库</h2>
+            </div>
+            <button data-refresh="material" type="button">刷新表格</button>
+          </div>
+          <form id="material-form" class="form-grid">
+            <label>供应商<input name="supplierName" placeholder="华东钢材" required /></label>
+            <label>物料编码<input name="materialCode" placeholder="MAT-001" required /></label>
+            <label>物料名称<input name="materialName" placeholder="冷轧钢板" required /></label>
+            <label>批次<input name="batchNo" placeholder="B202605" /></label>
+            <label>数量<input name="quantity" type="number" min="1" value="100" required /></label>
+            <label>单位<input name="unit" value="kg" required /></label>
+            <button type="submit">新增入库单</button>
+          </form>
+          <div id="material-inbounds-table"></div>
+        </section>
+
+        <section class="panel tab-panel" id="tab-inventory">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Inventory</p>
+              <h2>库存流水与余额</h2>
+            </div>
+            <button data-refresh="inventory" type="button">刷新表格</button>
+          </div>
+          <div class="table-grid two">
+            <article><h3>库存余额表</h3><div id="inventory-balances-table"></div></article>
+            <article><h3>库存流水表</h3><div id="inventory-transactions-table"></div></article>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="tab-orders">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Order Entry</p>
+              <h2>订单录入</h2>
+            </div>
+            <button data-refresh="orders" type="button">刷新表格</button>
+          </div>
+          <form id="order-form" class="form-grid">
+            <label>客户名称<input name="customerName" placeholder="示例客户" required /></label>
+            <label>产品编码<input name="productCode" placeholder="PROD-001" required /></label>
+            <label>产品名称<input name="productName" placeholder="定制零件" required /></label>
+            <label>数量<input name="quantity" type="number" min="1" value="10" required /></label>
+            <label>交期<input name="deliveryDate" type="date" /></label>
+            <button type="submit">新增订单</button>
+          </form>
+          <div id="orders-table"></div>
+        </section>
+
+        <section class="panel tab-panel" id="tab-process">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Process Flow</p>
+              <h2>工序流转</h2>
+            </div>
+            <button data-refresh="process" type="button">刷新表格</button>
+          </div>
+          <form id="process-task-form" class="form-grid">
+            <label>订单 ID<input name="orderId" placeholder="order-0001" required /></label>
+            <label>工序名称<input name="processName" placeholder="切割" required /></label>
+            <label>负责人 ID<input name="assigneeId" placeholder="user-admin" /></label>
+            <button type="submit">新增工序任务</button>
+          </form>
+          <div id="process-tasks-table"></div>
+        </section>
+
+        <section class="panel tab-panel" id="tab-reports">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Reports</p>
+              <h2>报表分析</h2>
+            </div>
+            <button data-refresh="reports" type="button">刷新报表</button>
+          </div>
+          <div class="report-cards" id="report-cards"></div>
+          <article><h3>库存余额报表明细</h3><div id="report-inventory-table"></div></article>
+        </section>
+
+        <section class="panel tab-panel" id="tab-audit">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Audit</p>
+              <h2>审计日志</h2>
+            </div>
+            <button data-refresh="audit" type="button">刷新表格</button>
+          </div>
+          <p class="hint">审计日志来自后端写操作记录，用于追踪当前原型中的登录、创建、审核、确认、流转等关键动作。</p>
+          <div id="audit-logs-table"></div>
+        </section>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    </main>
+
+    <script type="module" src="/web/app.js"></script>
+  </body>
+</html>
