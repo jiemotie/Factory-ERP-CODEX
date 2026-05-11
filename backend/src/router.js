@@ -1,4 +1,5 @@
 import { HttpError, notFound } from './http.js';
+import { saveStore } from './persistence.js';
 
 function splitPath(pathname) {
   return pathname.split('/').filter(Boolean);
@@ -75,6 +76,10 @@ export function createRouter({ store, routes }) {
         query: Object.fromEntries(url.searchParams.entries()),
         store
       });
+
+      if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) && result.status < 400) {
+        await saveStore(store);
+      }
 
       response.writeHead(result.status);
       if (result.body !== undefined) {

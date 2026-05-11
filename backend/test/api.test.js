@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { after, before, describe, it } from 'node:test';
 import { createApp } from '../src/server.js';
 import { createStore } from '../src/store.js';
+import { createPersistentStore, saveStore } from '../src/persistence.js';
 
 let server;
 let baseUrl;
@@ -66,6 +70,24 @@ describe('Factory ERP backend API', () => {
     const confirmed = await request(`/api/v1/material-inbounds/${inboundId}/confirm`, { method: 'POST' });
     assert.equal(confirmed.payload.data.inbound.status, 'confirmed');
     assert.equal(confirmed.payload.data.transactions[0].quantity, 120);
+
+    const transactions = await request('/api/v1/inventory-transactions');
+    assert.equal(transactions.response.status, 200);
+    assert.equal(transactions.payload.data.length, 1);
+  });
+
+  it('rejects invalid material inbound state transitions', async () => {
+    const created = await request('/api/v1/material-inbounds', {
+      method: 'POST',
+      body: {
+        supplierName: '状态测试供应商',
+        items: [{ materialCode: 'COPPER-001', materialName: '铜线', batchNo: 'B20260512', quantity: 20, unit: 'kg' }]
+      }
+    });
+
+    const confirmed = await request(`/api/v1/material-inbounds/${created.payload.data.id}/confirm`, { method: 'POST' });
+    assert.equal(confirmed.response.status, 400);
+    assert.equal(confirmed.payload.error.message, '只有已审核的材料入库单可以确认入库');
   });
 
   it('records an order and reports order progress', async () => {
@@ -109,5 +131,29 @@ describe('Factory ERP backend API', () => {
 
     const report = await request('/api/v1/reports/quality-rate');
     assert.equal(report.payload.data.qualityRate, 0.97);
+  });
+});
+
+
+describe('Factory ERP persistence', () => {
+  let directory;
+
+  after(async () => {
+    if (directory) {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('persists business data to a JSON data file', async () => {
+    directory = await mkdtemp(join(tmpdir(), 'factory-erp-'));
+    const dataFile = join(directory, 'data.json');
+    const firstStore = await createPersistentStore(dataFile);
+    firstStore.orders.push({ id: 'ord-test', orderNo: 'ORD-TEST', customerName: '持久化客户', status: 'draft', items: [] });
+    await saveStore(firstStore);
+
+    const secondStore = await createPersistentStore(dataFile);
+    assert.equal(secondStore.orders.length, 1);
+    assert.equal(secondStore.orders[0].customerName, '持久化客户');
+    assert.equal(secondStore.sessions.size, 0);
   });
 });

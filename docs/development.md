@@ -20,3 +20,8 @@
 - `backend/src/routes.js` 中的统一 `/api/v1` 路由。
 - `backend/src/modules/*/service.js` 中五个优先模块的处理逻辑。
 - `backend/test/api.test.js` 中覆盖核心业务链路的集成测试。
+
+
+## 中文规范
+
+后续代码注释、提交信息、PR 标题和 PR 描述统一使用中文。外部协议名、接口路径、技术名词和代码标识符可保留英文原文。

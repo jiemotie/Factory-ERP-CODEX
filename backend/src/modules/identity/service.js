@@ -1,4 +1,4 @@
-import { created, forbidden, ok, requireFields, unauthorized } from '../../http.js';
+import { badRequest, created, forbidden, ok, requireFields, unauthorized } from '../../http.js';
 import { nextId, recordAudit } from '../../store.js';
 
 function sanitizeUser(user) {
@@ -70,6 +70,10 @@ export function listUsers({ headers, store }) {
 export function createUser({ body, headers, store }) {
   const actor = authorize(headers, store, 'user:write');
   requireFields(body, ['username', 'displayName', 'password']);
+  if (store.users.some((user) => user.username === body.username)) {
+    badRequest('用户名已存在');
+  }
+
   const user = {
     id: nextId('user', 'user', store),
     username: body.username,
@@ -93,6 +97,10 @@ export function listRoles({ headers, store }) {
 export function createRole({ body, headers, store }) {
   const actor = authorize(headers, store, 'user:write');
   requireFields(body, ['code', 'name']);
+  if (store.roles.some((role) => role.code === body.code)) {
+    badRequest('角色编码已存在');
+  }
+
   const role = {
     id: nextId('role', 'role', store),
     code: body.code,

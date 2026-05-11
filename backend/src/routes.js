@@ -12,6 +12,7 @@ import {
   confirmMaterialInbound,
   createMaterialInbound,
   getMaterialInbound,
+  listInventoryTransactions,
   listMaterialInbounds
 } from './modules/material-inbound/service.js';
 import { approveOrder, cancelOrder, createOrder, getOrder, listOrders, updateOrder } from './modules/order-entry/service.js';
@@ -40,6 +41,7 @@ export const routes = [
   { method: 'GET', path: '/api/v1/material-inbounds/:id', handler: getMaterialInbound },
   { method: 'POST', path: '/api/v1/material-inbounds/:id/approve', handler: approveMaterialInbound },
   { method: 'POST', path: '/api/v1/material-inbounds/:id/confirm', handler: confirmMaterialInbound },
+  { method: 'GET', path: '/api/v1/inventory-transactions', handler: listInventoryTransactions },
 
   { method: 'GET', path: '/api/v1/orders', handler: listOrders },
   { method: 'POST', path: '/api/v1/orders', handler: createOrder },

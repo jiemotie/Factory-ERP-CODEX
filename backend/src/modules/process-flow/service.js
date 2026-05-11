@@ -1,4 +1,4 @@
-import { created, notFound, ok, requireFields } from '../../http.js';
+import { badRequest, created, notFound, ok, requireFields } from '../../http.js';
 import { nextId, recordAudit } from '../../store.js';
 import { authorize } from '../identity/service.js';
 
@@ -18,6 +18,10 @@ export function listProcessRoutes({ headers, store }) {
 export function createProcessRoute({ body, headers, store }) {
   const actor = authorize(headers, store, 'process:write');
   requireFields(body, ['code', 'name', 'steps']);
+  if (!Array.isArray(body.steps) || body.steps.length === 0) {
+    badRequest('工艺路线必须包含至少一道工序');
+  }
+
   const route = {
     id: nextId('route', 'processRoute', store),
     code: body.code,
@@ -61,6 +65,9 @@ export function createProcessTask({ body, headers, store }) {
 export function startProcessTask({ headers, params, store }) {
   const actor = authorize(headers, store, 'process:write');
   const task = findTask(store, params.id);
+  if (!['pending', 'rework'].includes(task.status)) {
+    badRequest('只有待处理或返工状态的工序任务可以开工');
+  }
   task.status = 'in_progress';
   task.startedAt = task.startedAt ?? new Date().toISOString();
   task.records.push({ action: 'start', actorId: actor.id, createdAt: new Date().toISOString() });
@@ -71,6 +78,9 @@ export function startProcessTask({ headers, params, store }) {
 export function completeProcessTask({ body, headers, params, store }) {
   const actor = authorize(headers, store, 'process:write');
   const task = findTask(store, params.id);
+  if (task.status !== 'in_progress') {
+    badRequest('只有进行中的工序任务可以完工');
+  }
   task.status = 'completed';
   task.completedAt = new Date().toISOString();
   task.outputQuantity = body.outputQuantity ?? task.outputQuantity ?? 0;
@@ -89,6 +99,9 @@ export function completeProcessTask({ body, headers, params, store }) {
 export function reworkProcessTask({ body, headers, params, store }) {
   const actor = authorize(headers, store, 'process:write');
   const task = findTask(store, params.id);
+  if (task.status !== 'completed') {
+    badRequest('只有已完工的工序任务可以返工');
+  }
   task.status = 'rework';
   task.reworkReason = body.reason ?? '未填写返工原因';
   task.records.push({ action: 'rework', actorId: actor.id, reason: task.reworkReason, createdAt: new Date().toISOString() });

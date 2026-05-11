@@ -1,4 +1,4 @@
-import { created, notFound, ok, requireFields } from '../../http.js';
+import { badRequest, created, notFound, ok, requireFields } from '../../http.js';
 import { nextId, recordAudit } from '../../store.js';
 import { authorize } from '../identity/service.js';
 
@@ -18,6 +18,10 @@ export function listMaterialInbounds({ headers, store }) {
 export function createMaterialInbound({ body, headers, store }) {
   const actor = authorize(headers, store, 'material:write');
   requireFields(body, ['supplierName', 'items']);
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    badRequest('材料明细不能为空');
+  }
+
   const inbound = {
     id: nextId('mi', 'materialInbound', store),
     inboundNo: body.inboundNo ?? `MI-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${store.counters.materialInbound}`,
@@ -41,6 +45,9 @@ export function getMaterialInbound({ headers, params, store }) {
 export function approveMaterialInbound({ headers, params, store }) {
   const actor = authorize(headers, store, 'material:write');
   const inbound = findInbound(store, params.id);
+  if (inbound.status !== 'draft') {
+    badRequest('只有草稿状态的材料入库单可以审核');
+  }
   inbound.status = 'approved';
   inbound.approvedAt = new Date().toISOString();
   inbound.approvedBy = actor.id;
@@ -51,6 +58,9 @@ export function approveMaterialInbound({ headers, params, store }) {
 export function confirmMaterialInbound({ headers, params, store }) {
   const actor = authorize(headers, store, 'material:write');
   const inbound = findInbound(store, params.id);
+  if (inbound.status !== 'approved') {
+    badRequest('只有已审核的材料入库单可以确认入库');
+  }
   inbound.status = 'confirmed';
   inbound.confirmedAt = new Date().toISOString();
   inbound.confirmedBy = actor.id;
@@ -70,4 +80,9 @@ export function confirmMaterialInbound({ headers, params, store }) {
   store.inventoryTransactions.push(...transactions);
   recordAudit(store, actor, 'confirm', 'material_inbound', inbound.id, { transactionIds: transactions.map((item) => item.id) });
   return ok({ inbound, transactions });
+}
+
+export function listInventoryTransactions({ headers, store }) {
+  authorize(headers, store, 'material:write');
+  return ok(store.inventoryTransactions);
 }

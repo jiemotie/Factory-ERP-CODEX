@@ -1,4 +1,4 @@
-export function createStore() {
+export function createStore(initialData = {}) {
   const permissions = [
     { id: 'perm-user-read', code: 'user:read', name: '查看用户', resource: 'users', action: 'read' },
     { id: 'perm-user-write', code: 'user:write', name: '维护用户', resource: 'users', action: 'write' },
@@ -26,16 +26,16 @@ export function createStore() {
   ];
 
   return {
-    permissions,
-    roles,
-    users,
+    permissions: initialData.permissions ?? permissions,
+    roles: initialData.roles ?? roles,
+    users: initialData.users ?? users,
     sessions: new Map(),
-    materialInbounds: [],
-    inventoryTransactions: [],
-    orders: [],
-    processRoutes: [],
-    processTasks: [],
-    auditLogs: [],
+    materialInbounds: initialData.materialInbounds ?? [],
+    inventoryTransactions: initialData.inventoryTransactions ?? [],
+    orders: initialData.orders ?? [],
+    processRoutes: initialData.processRoutes ?? [],
+    processTasks: initialData.processTasks ?? [],
+    auditLogs: initialData.auditLogs ?? [],
     counters: {
       materialInbound: 0,
       inventoryTransaction: 0,
@@ -44,8 +44,10 @@ export function createStore() {
       processTask: 0,
       auditLog: 0,
       user: users.length,
-      role: roles.length
-    }
+      role: roles.length,
+      ...(initialData.counters ?? {})
+    },
+    persistenceFile: initialData.persistenceFile
   };
 }
 

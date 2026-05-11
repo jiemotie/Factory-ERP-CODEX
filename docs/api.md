@@ -33,6 +33,7 @@ Authorization: Bearer <token>
 | GET | `/api/v1/material-inbounds/{id}` | 查询入库单详情 | Implemented |
 | POST | `/api/v1/material-inbounds/{id}/approve` | 审核入库单 | Implemented |
 | POST | `/api/v1/material-inbounds/{id}/confirm` | 确认入库并生成库存流水 | Implemented |
+| GET | `/api/v1/inventory-transactions` | 查询库存流水 | Implemented |
 
 ## Order Entry
 

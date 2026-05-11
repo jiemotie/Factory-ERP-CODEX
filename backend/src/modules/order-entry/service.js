@@ -1,4 +1,4 @@
-import { created, notFound, ok, requireFields } from '../../http.js';
+import { badRequest, created, notFound, ok, requireFields } from '../../http.js';
 import { nextId, recordAudit } from '../../store.js';
 import { authorize } from '../identity/service.js';
 
@@ -18,6 +18,10 @@ export function listOrders({ headers, store }) {
 export function createOrder({ body, headers, store }) {
   const actor = authorize(headers, store, 'order:write');
   requireFields(body, ['customerName', 'items']);
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    badRequest('订单明细不能为空');
+  }
+
   const order = {
     id: nextId('ord', 'order', store),
     orderNo: body.orderNo ?? `ORD-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${store.counters.order}`,
@@ -42,6 +46,9 @@ export function getOrder({ headers, params, store }) {
 export function updateOrder({ body, headers, params, store }) {
   const actor = authorize(headers, store, 'order:write');
   const order = findOrder(store, params.id);
+  if (!['draft', 'approved'].includes(order.status)) {
+    badRequest('当前订单状态不允许更新');
+  }
   Object.assign(order, {
     customerName: body.customerName ?? order.customerName,
     dueDate: body.dueDate ?? order.dueDate,
@@ -57,6 +64,9 @@ export function updateOrder({ body, headers, params, store }) {
 export function approveOrder({ headers, params, store }) {
   const actor = authorize(headers, store, 'order:write');
   const order = findOrder(store, params.id);
+  if (order.status !== 'draft') {
+    badRequest('只有草稿状态的订单可以审核');
+  }
   order.status = 'approved';
   order.approvedAt = new Date().toISOString();
   order.approvedBy = actor.id;
@@ -67,6 +77,9 @@ export function approveOrder({ headers, params, store }) {
 export function cancelOrder({ headers, params, store }) {
   const actor = authorize(headers, store, 'order:write');
   const order = findOrder(store, params.id);
+  if (order.status === 'cancelled') {
+    badRequest('订单已经取消');
+  }
   order.status = 'cancelled';
   order.cancelledAt = new Date().toISOString();
   order.cancelledBy = actor.id;
