@@ -11,7 +11,8 @@ export const openApiDocument = {
     { name: 'MaterialInbound', description: '材料入库、库存流水与库存余额' },
     { name: 'OrderEntry', description: '订单录入与订单状态流转' },
     { name: 'ProcessFlow', description: '工艺路线与工序任务流转' },
-    { name: 'Reports', description: '报表分析' }
+    { name: 'Reports', description: '报表分析' },
+    { name: 'Audit', description: '审计日志' }
   ],
   components: {
     securitySchemes: {
@@ -92,6 +93,18 @@ export const openApiDocument = {
           items: { type: 'array', items: { type: 'object' } }
         }
       },
+      AuditLog: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          actorId: { type: 'string' },
+          action: { type: 'string' },
+          entityType: { type: 'string' },
+          entityId: { type: 'string' },
+          details: { type: 'object' },
+          createdAt: { type: 'string' }
+        }
+      },
       ProcessTask: {
         type: 'object',
         properties: {
@@ -129,6 +142,7 @@ export const openApiDocument = {
       post: { tags: ['Identity'], summary: '创建角色', responses: { '201': { description: '创建成功' } } }
     },
     '/api/v1/permissions': { get: { tags: ['Identity'], summary: '查询权限点', responses: { '200': { description: '权限列表' } } } },
+    '/api/v1/audit-logs': { get: { tags: ['Audit'], summary: '查询审计日志', responses: { '200': { description: '审计日志列表' } } } },
     '/api/v1/material-inbounds': {
       get: { tags: ['MaterialInbound'], summary: '查询材料入库单', responses: { '200': { description: '入库单列表' } } },
       post: { tags: ['MaterialInbound'], summary: '创建材料入库单', responses: { '201': { description: '创建成功' } } }
@@ -169,6 +183,7 @@ export const openApiDocument = {
     },
     '/api/v1/orders/{id}/approve': { post: { tags: ['OrderEntry'], summary: '审核订单', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: '审核成功' } } } },
     '/api/v1/orders/{id}/cancel': { post: { tags: ['OrderEntry'], summary: '取消订单', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: '取消成功' } } } },
+    '/api/v1/orders/{id}/generate-process-tasks': { post: { tags: ['OrderEntry', 'ProcessFlow'], summary: '从已审核订单生成工序任务', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '201': { description: '生成成功' }, '400': { description: '订单状态不允许或已生成' } } } },
     '/api/v1/process-routes': {
       get: { tags: ['ProcessFlow'], summary: '查询工艺路线', responses: { '200': { description: '工艺路线列表' } } },
       post: { tags: ['ProcessFlow'], summary: '创建工艺路线', responses: { '201': { description: '创建成功' } } }

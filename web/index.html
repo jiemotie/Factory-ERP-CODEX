@@ -47,6 +47,7 @@
           <button data-tab="orders" type="button">订单录入</button>
           <button data-tab="process" type="button">工序流转</button>
           <button data-tab="reports" type="button">报表分析</button>
+          <button data-tab="audit" type="button">审计日志</button>
         </nav>
 
         <section class="panel tab-panel active" id="tab-identity">
@@ -151,6 +152,18 @@
           </div>
           <div class="report-cards" id="report-cards"></div>
           <article><h3>库存余额报表明细</h3><div id="report-inventory-table"></div></article>
+        </section>
+
+        <section class="panel tab-panel" id="tab-audit">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Audit</p>
+              <h2>审计日志</h2>
+            </div>
+            <button data-refresh="audit" type="button">刷新表格</button>
+          </div>
+          <p class="hint">审计日志来自后端写操作记录，用于追踪当前原型中的登录、创建、审核、确认、流转等关键动作。</p>
+          <div id="audit-logs-table"></div>
         </section>
       </section>
 

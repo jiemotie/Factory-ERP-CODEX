@@ -23,6 +23,7 @@ Authorization: Bearer <token>
 | GET | `/api/v1/roles` | 查询角色列表 | Implemented |
 | POST | `/api/v1/roles` | 创建角色 | Implemented |
 | GET | `/api/v1/permissions` | 查询权限点 | Implemented |
+| GET | `/api/v1/audit-logs` | 查询审计日志 | Implemented |
 
 ## Material Inbound
 
@@ -46,6 +47,7 @@ Authorization: Bearer <token>
 | PATCH | `/api/v1/orders/{id}` | 更新订单 | Implemented |
 | POST | `/api/v1/orders/{id}/approve` | 审核订单 | Implemented |
 | POST | `/api/v1/orders/{id}/cancel` | 取消订单 | Implemented |
+| POST | `/api/v1/orders/{id}/generate-process-tasks` | 从已审核订单生成工序任务 | Implemented |
 
 ## Process Flow
 

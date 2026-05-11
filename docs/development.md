@@ -25,3 +25,21 @@
 ## 中文规范
 
 后续代码注释、提交信息、PR 标题和 PR 描述统一使用中文。外部协议名、接口路径、技术名词和代码标识符可保留英文原文。
+
+## 远端仓库
+
+当前 GitHub 远端仓库地址：`https://github.com/jiemotie/Factory-ERP-CODEX.git`。
+
+在本地环境首次同步时可执行：
+
+```bash
+git remote add origin https://github.com/jiemotie/Factory-ERP-CODEX.git
+git fetch origin --prune
+```
+
+如果远端已经存在，应使用：
+
+```bash
+git remote set-url origin https://github.com/jiemotie/Factory-ERP-CODEX.git
+git fetch origin --prune
+```

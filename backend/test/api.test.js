@@ -45,6 +45,7 @@ describe('Factory ERP backend API', () => {
     assert.match(response.headers.get('content-type'), /text\/html/);
     assert.match(html, /Factory ERP Web 管理端/);
     assert.match(html, /表格形式展示、录入和流转/);
+    assert.match(html, /审计日志/);
   });
 
   it('serves Web console JavaScript and stylesheets', async () => {
@@ -52,8 +53,10 @@ describe('Factory ERP backend API', () => {
 
     assert.equal(script.status, 200);
     assert.match(script.headers.get('content-type'), /text\/javascript/);
+    assert.match(await script.text(), /导出 CSV/);
     assert.equal(style.status, 200);
     assert.match(style.headers.get('content-type'), /text\/css/);
+    assert.match(await style.text(), /table-pagination/);
   });
 
   it('exposes a machine-readable OpenAPI contract', async () => {
@@ -62,6 +65,8 @@ describe('Factory ERP backend API', () => {
     assert.equal(contract.payload.openapi, '3.0.3');
     assert.equal(contract.payload.paths['/api/v1/material-inbounds/{id}/confirm'].post.summary, '确认入库并生成库存流水');
     assert.ok(contract.payload.paths['/api/v1/reports/inventory-balance']);
+    assert.ok(contract.payload.paths['/api/v1/audit-logs']);
+    assert.ok(contract.payload.paths['/api/v1/orders/{id}/generate-process-tasks']);
   });
 
   it('authenticates the seeded administrator and lists permissions', async () => {
@@ -77,6 +82,11 @@ describe('Factory ERP backend API', () => {
     const permissions = await request('/api/v1/permissions');
     assert.equal(permissions.response.status, 200);
     assert.ok(permissions.payload.data.some((permission) => permission.code === 'report:read'));
+    assert.ok(permissions.payload.data.some((permission) => permission.code === 'audit:read'));
+
+    const auditLogs = await request('/api/v1/audit-logs');
+    assert.equal(auditLogs.response.status, 200);
+    assert.ok(auditLogs.payload.data.some((auditLog) => auditLog.action === 'login'));
   });
 
   it('creates, approves, and confirms a material inbound order with inventory transactions', async () => {
@@ -142,6 +152,22 @@ describe('Factory ERP backend API', () => {
 
     const approved = await request(`/api/v1/orders/${orderId}/approve`, { method: 'POST' });
     assert.equal(approved.payload.data.status, 'approved');
+
+    const generated = await request(`/api/v1/orders/${orderId}/generate-process-tasks`, {
+      method: 'POST',
+      body: { processNames: ['下料', '加工', '质检'] }
+    });
+    assert.equal(generated.response.status, 201);
+    assert.equal(generated.payload.data.tasks.length, 3);
+    assert.equal(generated.payload.data.tasks[0].orderId, orderId);
+    assert.deepEqual(generated.payload.data.order.processTaskIds, generated.payload.data.tasks.map((task) => task.id));
+
+    const duplicated = await request(`/api/v1/orders/${orderId}/generate-process-tasks`, {
+      method: 'POST',
+      body: { processNames: ['重复工序'] }
+    });
+    assert.equal(duplicated.response.status, 400);
+    assert.equal(duplicated.payload.error.message, '订单已生成工序任务，不能重复生成');
 
     const report = await request('/api/v1/reports/order-progress');
     assert.equal(report.response.status, 200);

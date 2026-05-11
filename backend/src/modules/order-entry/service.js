@@ -86,3 +86,48 @@ export function cancelOrder({ headers, params, store }) {
   recordAudit(store, actor, 'cancel', 'order', order.id);
   return ok(order);
 }
+
+export function generateOrderProcessTasks({ body, headers, params, store }) {
+  const actor = authorize(headers, store, 'order:write');
+  const order = findOrder(store, params.id);
+  if (order.status !== 'approved') {
+    badRequest('只有已审核订单可以生成工序任务');
+  }
+  if (Array.isArray(order.processTaskIds) && order.processTaskIds.length > 0) {
+    badRequest('订单已生成工序任务，不能重复生成');
+  }
+
+  const processNames = body.processNames ?? ['下料', '加工', '质检'];
+  if (!Array.isArray(processNames) || processNames.length === 0) {
+    badRequest('工序名称列表不能为空');
+  }
+
+  const createdAt = new Date().toISOString();
+  const tasks = processNames.map((processName, index) => {
+    const task = {
+      id: nextId('pt', 'processTask', store),
+      orderId: order.id,
+      orderNo: order.orderNo,
+      processName,
+      sequence: index + 1,
+      status: 'pending',
+      assigneeId: body.assigneeId,
+      plannedStartAt: body.plannedStartAt,
+      plannedEndAt: body.plannedEndAt,
+      records: [],
+      source: 'order_generation',
+      createdAt,
+      createdBy: actor.id
+    };
+    store.processTasks.push(task);
+    recordAudit(store, actor, 'create', 'process_task', task.id, { orderId: order.id, orderNo: order.orderNo });
+    return task;
+  });
+
+  order.processTaskIds = tasks.map((task) => task.id);
+  order.processTasksGeneratedAt = createdAt;
+  order.updatedAt = createdAt;
+  order.updatedBy = actor.id;
+  recordAudit(store, actor, 'generate_process_tasks', 'order', order.id, { processTaskIds: order.processTaskIds });
+  return created({ order, tasks });
+}

@@ -64,7 +64,8 @@ const columns = {
     ['customerName', '客户'],
     ['status', '状态'],
     ['deliveryDate', '交期'],
-    ['items', '明细']
+    ['items', '明细'],
+    ['processTaskIds', '工序任务']
   ],
   processTasks: [
     ['id', '任务 ID'],
@@ -74,10 +75,20 @@ const columns = {
     ['assigneeId', '负责人'],
     ['outputQuantity', '产出'],
     ['defectQuantity', '不良']
+  ],
+  auditLogs: [
+    ['createdAt', '时间'],
+    ['actorId', '操作人'],
+    ['action', '动作'],
+    ['entityType', '对象类型'],
+    ['entityId', '对象 ID'],
+    ['details', '详情']
   ]
 };
 
 const $ = (selector) => document.querySelector(selector);
+
+const tableState = new Map();
 
 function showToast(message) {
   const toast = $('#toast');
@@ -114,6 +125,37 @@ function formatValue(value) {
   return escapeHtml(statusText[value] ?? value ?? '-');
 }
 
+function flattenValue(value) {
+  if (Array.isArray(value)) {
+    return value.map(flattenValue).join(' ');
+  }
+  if (value && typeof value === 'object') {
+    return Object.values(value).map(flattenValue).join(' ');
+  }
+  return String(statusText[value] ?? value ?? '');
+}
+
+function getTableState(target) {
+  if (!tableState.has(target)) {
+    tableState.set(target, { page: 1, pageSize: 10, keyword: '' });
+  }
+  return tableState.get(target);
+}
+
+function downloadCsv(filename, rows, tableColumns) {
+  const header = tableColumns.map(([, label]) => label);
+  const body = rows.map((row) => tableColumns.map(([key]) => flattenValue(row[key])));
+  const csv = [header, ...body]
+    .map((line) => line.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
 function renderTable(target, rows, tableColumns, actions = () => []) {
   const container = $(target);
   if (!rows || rows.length === 0) {
@@ -121,8 +163,24 @@ function renderTable(target, rows, tableColumns, actions = () => []) {
     return;
   }
 
+  const current = getTableState(target);
+  const keyword = current.keyword.trim().toLowerCase();
+  const filteredRows = keyword ? rows.filter((row) => flattenValue(row).toLowerCase().includes(keyword)) : rows;
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / current.pageSize));
+  current.page = Math.min(Math.max(current.page, 1), totalPages);
+  const start = (current.page - 1) * current.pageSize;
+  const pageRows = filteredRows.slice(start, start + current.pageSize);
   const hasActions = rows.some((row) => actions(row).length > 0);
+
   container.innerHTML = `
+    <div class="table-toolbar">
+      <label class="table-search">关键字筛选<input data-role="table-keyword" value="${escapeHtml(current.keyword)}" placeholder="输入任意字段筛选" /></label>
+      <label class="table-size">每页<select data-role="table-page-size">
+        ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${size === current.pageSize ? 'selected' : ''}>${size}</option>`).join('')}
+      </select> 条</label>
+      <button class="secondary" data-role="table-export" type="button">导出 CSV</button>
+      <span class="table-count">共 ${rows.length} 条，筛选后 ${filteredRows.length} 条</span>
+    </div>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -134,10 +192,21 @@ function renderTable(target, rows, tableColumns, actions = () => []) {
         <tbody></tbody>
       </table>
     </div>
+    <div class="table-pagination">
+      <button class="secondary" data-role="table-prev" type="button" ${current.page === 1 ? 'disabled' : ''}>上一页</button>
+      <span>第 ${current.page} / ${totalPages} 页</span>
+      <button class="secondary" data-role="table-next" type="button" ${current.page === totalPages ? 'disabled' : ''}>下一页</button>
+    </div>
   `;
 
   const tbody = container.querySelector('tbody');
-  rows.forEach((row) => {
+  if (pageRows.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="${tableColumns.length + (hasActions ? 1 : 0)}">未找到匹配数据</td>`;
+    tbody.append(tr);
+  }
+
+  pageRows.forEach((row) => {
     const tr = document.createElement('tr');
     tr.innerHTML = tableColumns.map(([key]) => `<td>${formatValue(row[key])}</td>`).join('');
     const rowActions = actions(row);
@@ -148,6 +217,28 @@ function renderTable(target, rows, tableColumns, actions = () => []) {
       tr.append(td);
     }
     tbody.append(tr);
+  });
+
+  container.querySelector('[data-role="table-keyword"]').addEventListener('input', (event) => {
+    current.keyword = event.target.value;
+    current.page = 1;
+    renderTable(target, rows, tableColumns, actions);
+  });
+  container.querySelector('[data-role="table-page-size"]').addEventListener('change', (event) => {
+    current.pageSize = Number(event.target.value);
+    current.page = 1;
+    renderTable(target, rows, tableColumns, actions);
+  });
+  container.querySelector('[data-role="table-export"]').addEventListener('click', () => {
+    downloadCsv(`${target.replace('#', '')}.csv`, filteredRows, tableColumns);
+  });
+  container.querySelector('[data-role="table-prev"]').addEventListener('click', () => {
+    current.page -= 1;
+    renderTable(target, rows, tableColumns, actions);
+  });
+  container.querySelector('[data-role="table-next"]').addEventListener('click', () => {
+    current.page += 1;
+    renderTable(target, rows, tableColumns, actions);
   });
 }
 
@@ -230,11 +321,25 @@ async function refreshOrders() {
           await refreshAll(['orders', 'reports']);
         })
       : null,
+    row.status === 'approved' && !(Array.isArray(row.processTaskIds) && row.processTaskIds.length > 0)
+      ? makeButton('生成工序', '', async () => {
+          const names = prompt('请输入工序名称，多个工序用逗号分隔', '下料,加工,质检');
+          if (!names) {
+            return;
+          }
+          await api(`/orders/${row.id}/generate-process-tasks`, {
+            method: 'POST',
+            body: JSON.stringify({ processNames: names.split(',').map((item) => item.trim()).filter(Boolean) })
+          });
+          showToast('已从订单生成工序任务');
+          await refreshAll(['orders', 'process', 'reports', 'audit']);
+        })
+      : null,
     ['draft', 'approved'].includes(row.status)
       ? makeButton('取消', 'danger', async () => {
           await api(`/orders/${row.id}/cancel`, { method: 'POST' });
           showToast('订单已取消');
-          await refreshAll(['orders', 'reports']);
+          await refreshAll(['orders', 'reports', 'audit']);
         })
       : null
   ].filter(Boolean));
@@ -275,6 +380,11 @@ async function refreshProcess() {
   ].filter(Boolean));
 }
 
+async function refreshAudit() {
+  const rows = await api('/audit-logs');
+  renderTable('#audit-logs-table', rows, columns.auditLogs);
+}
+
 async function refreshReports() {
   const [inbound, order, capacity, quality, inventory] = await Promise.all([
     api('/reports/material-inbound-summary'),
@@ -301,7 +411,8 @@ const refreshers = {
   inventory: refreshInventory,
   orders: refreshOrders,
   process: refreshProcess,
-  reports: refreshReports
+  reports: refreshReports,
+  audit: refreshAudit
 };
 
 async function refreshAll(names = Object.keys(refreshers)) {

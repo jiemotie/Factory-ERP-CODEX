@@ -16,7 +16,7 @@ import {
   listInventoryTransactions,
   listMaterialInbounds
 } from './modules/material-inbound/service.js';
-import { approveOrder, cancelOrder, createOrder, getOrder, listOrders, updateOrder } from './modules/order-entry/service.js';
+import { approveOrder, cancelOrder, createOrder, generateOrderProcessTasks, getOrder, listOrders, updateOrder } from './modules/order-entry/service.js';
 import {
   completeProcessTask,
   createProcessRoute,
@@ -28,6 +28,7 @@ import {
 } from './modules/process-flow/service.js';
 import { inventoryBalance, materialInboundSummary, orderProgress, processCapacity, qualityRate } from './modules/reports/service.js';
 import { openApiDocument } from './openapi.js';
+import { listAuditLogs } from './modules/audit/service.js';
 
 function getOpenApiDocument() {
   return { status: 200, body: openApiDocument };
@@ -42,6 +43,7 @@ export const routes = [
   { method: 'GET', path: '/api/v1/roles', handler: listRoles },
   { method: 'POST', path: '/api/v1/roles', handler: createRole },
   { method: 'GET', path: '/api/v1/permissions', handler: listPermissions },
+  { method: 'GET', path: '/api/v1/audit-logs', handler: listAuditLogs },
 
   { method: 'GET', path: '/api/v1/material-inbounds', handler: listMaterialInbounds },
   { method: 'POST', path: '/api/v1/material-inbounds', handler: createMaterialInbound },
@@ -57,6 +59,7 @@ export const routes = [
   { method: 'PATCH', path: '/api/v1/orders/:id', handler: updateOrder },
   { method: 'POST', path: '/api/v1/orders/:id/approve', handler: approveOrder },
   { method: 'POST', path: '/api/v1/orders/:id/cancel', handler: cancelOrder },
+  { method: 'POST', path: '/api/v1/orders/:id/generate-process-tasks', handler: generateOrderProcessTasks },
 
   { method: 'GET', path: '/api/v1/process-routes', handler: listProcessRoutes },
   { method: 'POST', path: '/api/v1/process-routes', handler: createProcessRoute },

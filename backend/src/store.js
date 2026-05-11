@@ -5,7 +5,8 @@ export function createStore(initialData = {}) {
     { id: 'perm-material-write', code: 'material:write', name: '维护入库', resource: 'material-inbounds', action: 'write' },
     { id: 'perm-order-write', code: 'order:write', name: '维护订单', resource: 'orders', action: 'write' },
     { id: 'perm-process-write', code: 'process:write', name: '维护工序', resource: 'process-tasks', action: 'write' },
-    { id: 'perm-report-read', code: 'report:read', name: '查看报表', resource: 'reports', action: 'read' }
+    { id: 'perm-report-read', code: 'report:read', name: '查看报表', resource: 'reports', action: 'read' },
+    { id: 'perm-audit-read', code: 'audit:read', name: '查看审计日志', resource: 'audit-logs', action: 'read' }
   ];
 
   const roles = [
