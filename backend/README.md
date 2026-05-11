@@ -12,7 +12,7 @@ npm test
 npm start
 ```
 
-默认监听 `http://localhost:3000`，接口统一使用 `/api/v1` 前缀。
+默认监听 `http://localhost:3000`，接口统一使用 `/api/v1` 前缀。启动后端后也可访问 `http://localhost:3000/` 或 `/web` 打开 Web 管理端表格原型；该页面不直接连接数据库，只通过同源 `/api/v1` 接口展示和录入当前原型数据。
 
 如需将内存数据持久化到本地 JSON 文件，可设置：
 

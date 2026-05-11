@@ -6,7 +6,7 @@ Factory ERP 多端项目骨架，采用统一后端 API 作为唯一数据源，
 
 ```text
 backend/   统一后端 API 服务
-web/       Web 管理端
+web/       Web 管理端（当前提供表格化原型）
 desktop/   Windows 桌面端
 mobile/    Android 移动端
 docs/      需求说明、数据库设计、接口文档

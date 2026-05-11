@@ -1,0 +1,279 @@
+:root {
+  color: #182133;
+  background: #eef3f8;
+  font-family: Inter, "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 1180px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: #ffffff;
+  background: #1769e0;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(23, 105, 224, 0.18);
+}
+
+button:hover {
+  background: #1058c3;
+}
+
+button.ghost {
+  color: #1769e0;
+  background: #eaf2ff;
+  box-shadow: none;
+}
+
+button.danger {
+  background: #c2410c;
+}
+
+button.secondary {
+  color: #1f2a44;
+  background: #e8eef6;
+  box-shadow: none;
+}
+
+input {
+  width: 100%;
+  border: 1px solid #cfdae8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #526174;
+  font-size: 14px;
+}
+
+main {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 40px;
+  color: #ffffff;
+  background: linear-gradient(120deg, #10294f, #155ab6);
+}
+
+.topbar h1,
+.panel h2,
+.panel h3 {
+  margin: 0;
+}
+
+.subtitle,
+.eyebrow {
+  margin: 0;
+}
+
+.eyebrow {
+  color: #73a8ff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  max-width: 760px;
+  color: #d9e7ff;
+}
+
+.session-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.panel {
+  margin-bottom: 20px;
+  border: 1px solid #dce5f0;
+  border-radius: 20px;
+  padding: 24px;
+  background: #ffffff;
+  box-shadow: 0 20px 45px rgba(33, 51, 83, 0.08);
+}
+
+.login-panel {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: end;
+}
+
+.workspace {
+  display: grid;
+  gap: 16px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tabs button {
+  color: #526174;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tabs button.active {
+  color: #ffffff;
+  background: #1769e0;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: grid;
+  gap: 20px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.form-grid.compact {
+  grid-template-columns: 1fr 1fr auto;
+}
+
+.table-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.table-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.table-wrapper {
+  overflow: auto;
+  border: 1px solid #e1e8f2;
+  border-radius: 14px;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e7edf5;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+th {
+  color: #526174;
+  background: #f6f8fb;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+td.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty {
+  border: 1px dashed #c8d4e3;
+  border-radius: 14px;
+  padding: 20px;
+  color: #66758a;
+  background: #f8fafc;
+}
+
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.report-card {
+  border: 1px solid #e1e8f2;
+  border-radius: 16px;
+  padding: 16px;
+  background: #f8fbff;
+}
+
+.report-card strong {
+  display: block;
+  margin-top: 8px;
+  color: #10294f;
+  font-size: 28px;
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  max-width: 460px;
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: #ffffff;
+  background: #10294f;
+  box-shadow: 0 16px 40px rgba(16, 41, 79, 0.25);
+}
+
+@media (max-width: 1280px) {
+  body {
+    min-width: 0;
+  }
+
+  .login-panel,
+  .table-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid,
+  .form-grid.compact,
+  .report-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

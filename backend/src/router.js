@@ -1,5 +1,6 @@
 import { HttpError, notFound } from './http.js';
 import { saveStore } from './persistence.js';
+import { serveWebAsset } from './static-web.js';
 
 function splitPath(pathname) {
   return pathname.split('/').filter(Boolean);
@@ -44,6 +45,10 @@ async function parseJsonBody(request) {
 export function createRouter({ store, routes }) {
   return async function handle(request, response) {
     const url = new URL(request.url, `http://${request.headers.host}`);
+    if (await serveWebAsset(request, response, url.pathname)) {
+      return;
+    }
+
     const route = routes.find((candidate) => {
       if (candidate.method !== request.method) {
         return false;

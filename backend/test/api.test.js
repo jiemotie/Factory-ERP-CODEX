@@ -37,7 +37,24 @@ describe('Factory ERP backend API', () => {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   });
 
+  it('serves the table-first Web management console', async () => {
+    const response = await fetch(`${baseUrl}/`);
+    const html = await response.text();
 
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('content-type'), /text\/html/);
+    assert.match(html, /Factory ERP Web 管理端/);
+    assert.match(html, /表格形式展示、录入和流转/);
+  });
+
+  it('serves Web console JavaScript and stylesheets', async () => {
+    const [script, style] = await Promise.all([fetch(`${baseUrl}/web/app.js`), fetch(`${baseUrl}/web/styles.css`)]);
+
+    assert.equal(script.status, 200);
+    assert.match(script.headers.get('content-type'), /text\/javascript/);
+    assert.equal(style.status, 200);
+    assert.match(style.headers.get('content-type'), /text\/css/);
+  });
 
   it('exposes a machine-readable OpenAPI contract', async () => {
     const contract = await request('/api/v1/openapi.json', { headers: { Authorization: '' } });
