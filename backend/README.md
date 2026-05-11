@@ -43,3 +43,8 @@ ERP_DATA_FILE=./data/factory-erp.json npm start
 - 权限校验必须在后端执行，前端仅做展示与交互控制。
 - 写操作记录审计日志，后续可持久化到数据库审计表。
 - 多端读取同一业务对象时，应以 API 返回结果为准。
+
+
+## OpenAPI 契约
+
+启动服务后可访问 `GET /api/v1/openapi.json` 获取机器可读接口契约，便于多端统一生成客户端或进行联调。

@@ -32,3 +32,4 @@ docs/      需求说明、数据库设计、接口文档
 - [Database Design Draft](docs/database-design.md)
 - [Development Workflow](docs/development.md)
 - [Current Status](docs/status.md)
+- [OpenAPI Contract](docs/openapi.md)

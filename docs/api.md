@@ -68,3 +68,10 @@ Authorization: Bearer <token>
 | GET | `/api/v1/reports/process-capacity` | 工序产能报表 | Implemented |
 | GET | `/api/v1/reports/quality-rate` | 良率分析报表 | Implemented |
 | GET | `/api/v1/reports/inventory-balance` | 库存余额报表 | Implemented |
+
+
+## OpenAPI
+
+| Method | Path | Description | Status |
+| --- | --- | --- | --- |
+| GET | `/api/v1/openapi.json` | 获取机器可读 OpenAPI JSON 契约 | Implemented |

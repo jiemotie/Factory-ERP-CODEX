@@ -27,8 +27,14 @@ import {
   startProcessTask
 } from './modules/process-flow/service.js';
 import { inventoryBalance, materialInboundSummary, orderProgress, processCapacity, qualityRate } from './modules/reports/service.js';
+import { openApiDocument } from './openapi.js';
+
+function getOpenApiDocument() {
+  return { status: 200, body: openApiDocument };
+}
 
 export const routes = [
+  { method: 'GET', path: '/api/v1/openapi.json', handler: getOpenApiDocument },
   { method: 'POST', path: '/api/v1/auth/login', handler: login },
   { method: 'POST', path: '/api/v1/auth/logout', handler: logout },
   { method: 'GET', path: '/api/v1/users', handler: listUsers },

@@ -37,6 +37,16 @@ describe('Factory ERP backend API', () => {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   });
 
+
+
+  it('exposes a machine-readable OpenAPI contract', async () => {
+    const contract = await request('/api/v1/openapi.json', { headers: { Authorization: '' } });
+    assert.equal(contract.response.status, 200);
+    assert.equal(contract.payload.openapi, '3.0.3');
+    assert.equal(contract.payload.paths['/api/v1/material-inbounds/{id}/confirm'].post.summary, '确认入库并生成库存流水');
+    assert.ok(contract.payload.paths['/api/v1/reports/inventory-balance']);
+  });
+
   it('authenticates the seeded administrator and lists permissions', async () => {
     const login = await request('/api/v1/auth/login', {
       method: 'POST',
